@@ -9,8 +9,8 @@ import numpy as np
 from detectron2.config import get_cfg
 from detectron2.utils.logger import setup_logger
 from detectron2 import model_zoo
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+import sys
+#sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 from .visualize import Visualization
 
@@ -18,7 +18,7 @@ VAR_LAYER_CNT = 50	# COCO dataset (in case of rcnn_R_50_FPN)
 VAR_NUM_CLASSES = 6	# number of classes
 VAR_RES_DIR = './result'
 VAR_OUTPUT_DIR = './output'
-
+"""
 def setup_cfg(path):
   cfg = get_cfg()
   cfg.MODEL.DEVICE='cpu'
@@ -31,12 +31,11 @@ def setup_cfg(path):
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128  # faster, and good enough for this toy dataset (default: 512)
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = VAR_NUM_CLASSES  # only has one class (chicken)
     cfg.MODEL.WEIGHTS = os.path.join(path, "model_final.pth")
+    #cfg.MODEL.WEIGHTS = os.path("~/colcon_ws/src/cv_basics/cv_basics/output/model_final.pth")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set a custom testing threshold
     cfg.freeze()
   return cfg
-
-
-
+"""
 class ImageSubscriber(Node):
   """
   Create an ImageSubscriber class, which is a subclass of the Node class.
@@ -59,8 +58,8 @@ class ImageSubscriber(Node):
       
     # Used to convert between ROS and OpenCV images
     self.br = CvBridge()
-  """  
-  def setup_cfg(path):
+   
+  def setup_cfg(self,path):
     cfg = get_cfg()
     cfg.MODEL.DEVICE='cpu'
     if (VAR_LAYER_CNT == 50):
@@ -75,7 +74,7 @@ class ImageSubscriber(Node):
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set a custom testing threshold
     cfg.freeze()
     return cfg
-  """
+  
   def listener_callback(self, data):
     """
     Callback function.
@@ -85,7 +84,9 @@ class ImageSubscriber(Node):
  
     # Convert ROS Image message to OpenCV image
     current_frame = self.br.imgmsg_to_cv2(data)
-    
+    #video = cv2.imshow("camera", current_frame)
+    #out = cv2.imwrite('test.jpg', current_frame)
+
     # Display image
     #cv2.imshow("camera", current_frame)
     
@@ -93,28 +94,19 @@ class ImageSubscriber(Node):
 
     r_path = VAR_RES_DIR
     m_path = VAR_OUTPUT_DIR
-    cfg = setup_cfg(m_path)
+    cfg = self.setup_cfg(m_path)
     os.makedirs(r_path, exist_ok=True)
 
-    print('meta: ', cfg.DATASETS.TEST[0], cfg.DATASETS)
+    #print('meta: ', cfg.DATASETS.TEST[0], cfg.DATASETS)
     vis = Visualization(cfg)
+    out = cv2.imwrite('test.jpg', current_frame)
+    img = cv2.imread('/home/parksy1314/colcon_ws/test.jpg')
+    num_instances, v_output = vis.run_on_image(img)
 
-    idx=0
-    while True:
-        img = cv2.imread("camera", current_frame)
 
-        num_instances, v_output = vis.run_on_image(img)
-
-        if num_instances == -1:
-            continue
-
-        fname = 'img_' + str(idx) + '.png'
-        out_filename = os.path.join(r_path, fname)
-        idx += 1
-        v_output.save(out_filename)
-
-    rs.release()
-    cv2.destroyAllWindows()
+    fname = 'img_.png'
+    out_filename = os.path.join(r_path, fname)
+    v_output.save(out_filename)
 
     cv2.waitKey(1)
   

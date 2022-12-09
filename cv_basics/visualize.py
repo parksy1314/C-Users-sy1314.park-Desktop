@@ -26,8 +26,8 @@ class Visualization(object):
                 Useful since the visualization logic can be slow.
         """
         #self.metadata = MetadataCatalog.get("data_").set(thing_classes=["chicken"])
-        self.metadata = MetadataCatalog.get("data_").set(thing_classes=['hand'])
-
+        #self.metadata = MetadataCatalog.get("data_").set(thing_classes=["hand","closebut","openbut","panel","outbut","activbut"])
+        self.metadata = MetadataCatalog.get("data_").set(thing_classes=["hand"])
         self.cpu_device = torch.device("cpu")
         self.instance_mode = instance_mode
 
