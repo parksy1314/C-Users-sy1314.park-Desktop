@@ -11,31 +11,14 @@ from detectron2.utils.logger import setup_logger
 from detectron2 import model_zoo
 import sys
 #sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
+import pyautogui
 from .visualize import Visualization
 
 VAR_LAYER_CNT = 50	# COCO dataset (in case of rcnn_R_50_FPN)
 VAR_NUM_CLASSES = 6	# number of classes
 VAR_RES_DIR = './result'
 VAR_OUTPUT_DIR = './output'
-"""
-def setup_cfg(path):
-  cfg = get_cfg()
-  cfg.MODEL.DEVICE='cpu'
-  if (VAR_LAYER_CNT == 50):
-    cfg.merge_from_file(model_zoo.get_config_file('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml'))
-  else:
-    cfg.merge_from_file(model_zoo.get_config_file('COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'))
-    cfg.SOLVER.IMS_PER_BATCH = 2
-    cfg.SOLVER.BASE_LR = 0.00025  # pick a good LR
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128  # faster, and good enough for this toy dataset (default: 512)
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = VAR_NUM_CLASSES  # only has one class (chicken)
-    cfg.MODEL.WEIGHTS = os.path.join(path, "model_final.pth")
-    #cfg.MODEL.WEIGHTS = os.path("~/colcon_ws/src/cv_basics/cv_basics/output/model_final.pth")
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set a custom testing threshold
-    cfg.freeze()
-  return cfg
-"""
+
 class ImageSubscriber(Node):
   """
   Create an ImageSubscriber class, which is a subclass of the Node class.
@@ -84,12 +67,7 @@ class ImageSubscriber(Node):
  
     # Convert ROS Image message to OpenCV image
     current_frame = self.br.imgmsg_to_cv2(data)
-    #video = cv2.imshow("camera", current_frame)
-    #out = cv2.imwrite('test.jpg', current_frame)
 
-    # Display image
-    #cv2.imshow("camera", current_frame)
-    
     setup_logger(name="fvcore")
 
     r_path = VAR_RES_DIR
@@ -97,11 +75,16 @@ class ImageSubscriber(Node):
     cfg = self.setup_cfg(m_path)
     os.makedirs(r_path, exist_ok=True)
 
-    #print('meta: ', cfg.DATASETS.TEST[0], cfg.DATASETS)
     vis = Visualization(cfg)
     out = cv2.imwrite('test.jpg', current_frame)
     img = cv2.imread('/home/parksy1314/colcon_ws/test.jpg')
     num_instances, v_output = vis.run_on_image(img)
+    if num_instances > 0:
+        pyautogui.hotkey('ctrl', 'alt', '3')
+        pyautogui.press('x', presses=1)
+    else:
+        pyautogui.hotkey('ctrl', 'alt', '3')
+        pyautogui.press('s')
 
 
     fname = 'img_.png'
